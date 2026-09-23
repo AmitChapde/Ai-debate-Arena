@@ -29,7 +29,7 @@ const agents = [
     ],
 
     provider: "gemini" as const,
-    model: "gemini-2.5-flash",
+    model: "gemini-3.6-flash",
     temperature: 0.7,
     status: "active" as const
   },
@@ -60,7 +60,7 @@ const agents = [
     ],
 
     provider: "gemini" as const,
-    model: "gemini-2.5-flash",
+    model: "gemini-3.6-flash",
     temperature: 0.8,
     status: "active" as const
   },
@@ -93,7 +93,7 @@ const agents = [
     ],
 
     provider: "gemini" as const,
-    model: "gemini-2.5-flash",
+    model: "gemini-3.6-flash",
     temperature: 0.3,
     status: "active" as const
   }

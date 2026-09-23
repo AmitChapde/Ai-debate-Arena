@@ -1,6 +1,7 @@
 import { Types } from "mongoose";
 
 import { Agent } from "./agent.model.js";
+import type { AgentRole } from "./agent.types.js";
 
 import type {
   IAgent
@@ -86,4 +87,17 @@ export async function deleteAgent(
     );
 
   return result !== null;
+}
+
+export async function getActiveAgentByRole(
+  role: AgentRole
+): Promise<IAgent | null> {
+  return Agent.findOne({
+    role,
+    status: "active"
+  })
+    .sort({
+      createdAt: -1
+    })
+    .lean<IAgent>();
 }

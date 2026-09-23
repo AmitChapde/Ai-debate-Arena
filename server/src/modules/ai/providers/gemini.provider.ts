@@ -30,7 +30,7 @@ export class GeminiProvider
   ): Promise<GenerateResponse> {
     const response =
       await this.client.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-3.6-flash",
 
         contents: request.userPrompt,
 
@@ -42,14 +42,20 @@ export class GeminiProvider
             request.temperature ?? 0.7,
 
           maxOutputTokens:
-            request.maxTokens ?? 1000
+            request.maxTokens ?? 1000,
+
+          responseMimeType:
+            request.responseMimeType,
+
+          responseJsonSchema:
+            request.responseJsonSchema
         }
       });
 
     return {
       text: response.text ?? "",
 
-      model: "gemini-2.5-flash",
+      model: "gemini-3.6-flash",
 
       provider: "gemini",
 

@@ -5,7 +5,9 @@ import {
   list,
   getOne,
   start,
-  respond
+  respond,
+  challenge,
+  judge
 } from "./debate.controller.js";
 
 import {
@@ -39,6 +41,16 @@ router.post(
 router.post(
   "/:id/respond",
   respond
+);
+
+router.post(
+  "/:id/challenge",
+  challenge
+);
+
+router.post(
+  "/:id/judge",
+  judge
 );
 
 export default router;

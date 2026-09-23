@@ -12,6 +12,10 @@ export interface GenerateRequest {
   temperature?: number;
 
   maxTokens?: number;
+
+  responseMimeType?: "application/json";
+
+  responseJsonSchema?: Record<string, unknown>;
 }
 
 export interface GenerateResponse {

@@ -9,7 +9,9 @@ import {
 } from "./debate.service.js";
 
 import { Scenario } from "../scenarios/scenario.model.js";
+import { getActiveAgentByRole } from "../agents/agent.service.js";
 
+import { buildAgentSystemPrompt } from "../agents/agent.prompt.js";
 import type {
   DebateEvaluation,
   DebateMessage,
@@ -109,17 +111,20 @@ export class DebateEngine {
       throw new Error("Scenario not found");
     }
 
-    const response = await this.aiProvider.generate({
-      systemPrompt: this.buildChallengerSystemPrompt(),
+    const agent = await getActiveAgentByRole("challenger");
 
+    if (!agent) {
+      throw new Error("No active challenger agent found");
+    }
+
+    const response = await this.aiProvider.generate({
+      systemPrompt: buildAgentSystemPrompt(agent),
       userPrompt: this.buildDebatePrompt(
         scenario,
         debate.selectedPosition,
         debate.messages,
       ),
-
-      temperature: 0.85,
-
+      temperature: agent.temperature,
       maxTokens: 1000,
     });
 
@@ -177,6 +182,35 @@ export class DebateEngine {
       temperature: 0.2,
 
       maxTokens: 1500,
+
+      responseMimeType: "application/json",
+
+      responseJsonSchema: {
+        type: "object",
+        properties: {
+          overallScore: { type: "integer", minimum: 0, maximum: 100 },
+          reasoningScore: { type: "integer", minimum: 0, maximum: 100 },
+          evidenceScore: { type: "integer", minimum: 0, maximum: 100 },
+          counterArgumentScore: { type: "integer", minimum: 0, maximum: 100 },
+          consistencyScore: { type: "integer", minimum: 0, maximum: 100 },
+          adaptabilityScore: { type: "integer", minimum: 0, maximum: 100 },
+          strengths: { type: "array", items: { type: "string" } },
+          weaknesses: { type: "array", items: { type: "string" } },
+          feedback: { type: "string" }
+        },
+        required: [
+          "overallScore",
+          "reasoningScore",
+          "evidenceScore",
+          "counterArgumentScore",
+          "consistencyScore",
+          "adaptabilityScore",
+          "strengths",
+          "weaknesses",
+          "feedback"
+        ],
+        additionalProperties: false
+      }
     });
 
     const evaluation = this.parseEvaluation(response.text);
@@ -220,40 +254,35 @@ Do not speak as the Judge.
 `;
   }
 
-  private buildChallengerSystemPrompt(): string {
-    return `
-You are the Challenger in an AI Debate Arena.
-
-Your job is to critically challenge the user's reasoning.
-
-You should:
-- Identify weaknesses.
-- Question assumptions.
-- Present counterarguments.
-- Highlight trade-offs.
-- Look for missing evidence.
-- Introduce alternative perspectives.
-
-Do not evaluate the user's final performance.
-Do not act as the Judge.
-Do not simply disagree for the sake of disagreement.
-`;
-  }
-
   private buildJudgeSystemPrompt(): string {
     return `
-You are the Judge of an AI Debate Arena.
+You are the Judge in an AI Debate Arena.
 
-Evaluate the USER'S performance in the debate.
+Your job is to evaluate ONLY the user's performance in the debate.
 
-Evaluate:
+Evaluate the user on:
 1. Reasoning
 2. Evidence usage
 3. Counter-argument handling
 4. Consistency
 5. Adaptability
 
-Return ONLY valid JSON using this structure:
+Scoring:
+
+- Every score must be an integer from 0 to 100.
+- overallScore should represent the user's overall debate performance.
+
+You must return exactly ONE valid JSON object.
+
+IMPORTANT:
+
+- Do NOT use Markdown.
+- Do NOT wrap the JSON in \`\`\`json.
+- Do NOT add explanations before or after the JSON.
+- Do NOT include comments.
+- Do NOT include trailing commas.
+
+Required structure:
 
 {
   "overallScore": 0,
@@ -266,8 +295,6 @@ Return ONLY valid JSON using this structure:
   "weaknesses": [],
   "feedback": ""
 }
-
-Every score must be an integer from 0 to 100.
 `;
   }
 
@@ -338,15 +365,30 @@ Return the requested JSON structure.
   private parseEvaluation(
     rawText: string,
   ): Omit<DebateEvaluation, "createdAt"> {
+    let cleaned = rawText.trim();
+
+    // Preserve a fallback for providers that disregard structured output.
+    const fencedJson = cleaned.match(
+      /```(?:json)?\s*([\s\S]*?)\s*```/i,
+    );
+
+    if (fencedJson?.[1]) {
+      cleaned = fencedJson[1].trim();
+    }
+
     let parsed: unknown;
 
     try {
-      parsed = JSON.parse(rawText);
+      parsed = JSON.parse(cleaned);
     } catch {
       throw new Error("Judge returned invalid JSON");
     }
 
-    if (typeof parsed !== "object" || parsed === null) {
+    if (
+      typeof parsed !== "object" ||
+      parsed === null ||
+      Array.isArray(parsed)
+    ) {
       throw new Error("Invalid judge evaluation");
     }
 
@@ -364,6 +406,7 @@ Return the requested JSON structure.
     for (const field of scoreFields) {
       if (
         typeof data[field] !== "number" ||
+        !Number.isInteger(data[field]) ||
         data[field] < 0 ||
         data[field] > 100
       ) {
@@ -371,12 +414,16 @@ Return the requested JSON structure.
       }
     }
 
-    if (
-      !Array.isArray(data.strengths) ||
-      !Array.isArray(data.weaknesses) ||
-      typeof data.feedback !== "string"
-    ) {
-      throw new Error("Invalid judge evaluation structure");
+    if (!Array.isArray(data.strengths) || !data.strengths.every((item) => typeof item === "string")) {
+      throw new Error("Invalid judge strengths");
+    }
+
+    if (!Array.isArray(data.weaknesses) || !data.weaknesses.every((item) => typeof item === "string")) {
+      throw new Error("Invalid judge weaknesses");
+    }
+
+    if (typeof data.feedback !== "string") {
+      throw new Error("Invalid judge feedback");
     }
 
     return {
@@ -400,5 +447,3 @@ Return the requested JSON structure.
     };
   }
 }
-
-
