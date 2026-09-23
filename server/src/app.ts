@@ -6,6 +6,8 @@ import { env } from "./config/env.js";
 import healthRoutes from "./routes/health.routes.js";
 import { errorMiddleware } from "./middleware/error.middleware.js";
 import authRoutes from "./modules/auth/auth.routes.js";
+import scenarioRoutes from "./modules/scenarios/scenario.routes.js";
+
 
 const app = express();
 
@@ -43,6 +45,10 @@ app.use(cookieParser());
  */
 app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes);
+app.use(
+  "/api/scenarios",
+  scenarioRoutes
+);
 /*
  * 404 handler
  */
