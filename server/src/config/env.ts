@@ -6,27 +6,17 @@ const envSchema = z.object({
     .enum(["development", "test", "production"])
     .default("development"),
 
-  PORT: z.coerce
-    .number()
-    .int()
-    .positive()
-    .default(5000),
+  PORT: z.coerce.number().int().positive().default(5000),
 
-  MONGODB_URI: z
-    .string()
-    .min(1, "MONGODB_URI is required"),
+  MONGODB_URI: z.string().min(1, "MONGODB_URI is required"),
 
-  CLIENT_URL: z
-    .string()
-    .url("CLIENT_URL must be a valid URL"),
+  CLIENT_URL: z.string().url("CLIENT_URL must be a valid URL"),
 
-  JWT_SECRET: z
-    .string()
-    .min(32, "JWT_SECRET must be at least 32 characters"),
+  JWT_SECRET: z.string().min(32, "JWT_SECRET must be at least 32 characters"),
 
-  JWT_EXPIRES_IN: z
-    .string()
-    .default("7d")
+  JWT_EXPIRES_IN: z.string().default("7d"),
+
+  GEMINI_API_KEY: z.string().min(1, "GEMINI_API_KEY is required"),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);

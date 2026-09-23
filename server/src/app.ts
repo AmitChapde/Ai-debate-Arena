@@ -8,6 +8,8 @@ import { errorMiddleware } from "./middleware/error.middleware.js";
 import authRoutes from "./modules/auth/auth.routes.js";
 import scenarioRoutes from "./modules/scenarios/scenario.routes.js";
 import agentRoutes from "./modules/agents/agent.routes.js";
+import aiTestRoutes from "./routes/ai-test.routes.js";
+import debateRoutes from "./modules/debates/debate.routes.js";
 
 const app = express();
 
@@ -47,6 +49,8 @@ app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/scenarios", scenarioRoutes);
 app.use("/api/agents", agentRoutes);
+app.use("/api/ai-test", aiTestRoutes);
+app.use("/api/debates", debateRoutes);
 /*
  * 404 handler
  */
