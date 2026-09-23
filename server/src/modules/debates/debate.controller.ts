@@ -4,7 +4,8 @@ import type {
 } from "express";
 
 import {
-  createDebateSchema
+  createDebateSchema,
+  submitResponseSchema
 } from "./debate.validation.js";
 
 import {
@@ -13,6 +14,16 @@ import {
   getUserDebates,
   startDebate
 } from "./debate.service.js";
+
+import { DebateEngine } from "./debate.engine.js";
+
+import { createAIProvider } from "../ai/ai.factory.js";
+
+const aiProvider =
+  createAIProvider("gemini");
+
+const debateEngine =
+  new DebateEngine(aiProvider);
 
 export async function create(
   request: Request,
@@ -70,7 +81,6 @@ export async function getOne(
       success: false,
       message: "Invalid debate ID"
     });
-
     return;
   }
 
@@ -84,7 +94,6 @@ export async function getOne(
       success: false,
       message: "Debate not found"
     });
-
     return;
   }
 
@@ -96,7 +105,6 @@ export async function getOne(
       success: false,
       message: "Access denied"
     });
-
     return;
   }
 
@@ -122,7 +130,6 @@ export async function start(
       success: false,
       message: "Invalid debate ID"
     });
-
     return;
   }
 
@@ -136,7 +143,6 @@ export async function start(
       success: false,
       message: "Debate not found"
     });
-
     return;
   }
 
@@ -148,7 +154,6 @@ export async function start(
       success: false,
       message: "Access denied"
     });
-
     return;
   }
 
@@ -160,19 +165,212 @@ export async function start(
       message:
         "Debate has already been started"
     });
-
     return;
   }
 
+  await startDebate(
+    debateId
+  );
+
+  const message =
+    await debateEngine
+      .generateAdvocateResponse(
+        debateId
+      );
+
   const debate =
-    await startDebate(
+    await getDebateById(
       debateId
     );
 
   response.status(200).json({
     success: true,
     data: {
-      debate
+      debate,
+      message
+    }
+  });
+}
+
+export async function respond(
+  request: Request,
+  response: Response
+): Promise<void> {
+  const debateId =
+    request.params.id;
+
+  if (
+    typeof debateId !== "string"
+  ) {
+    response.status(400).json({
+      success: false,
+      message: "Invalid debate ID"
+    });
+    return;
+  }
+
+  const existing =
+    await getDebateById(
+      debateId
+    );
+
+  if (!existing) {
+    response.status(404).json({
+      success: false,
+      message: "Debate not found"
+    });
+    return;
+  }
+
+  if (
+    existing.userId.toString() !==
+    request.userId
+  ) {
+    response.status(403).json({
+      success: false,
+      message: "Access denied"
+    });
+    return;
+  }
+
+  const input =
+    submitResponseSchema.parse(
+      request.body
+    );
+
+  const message =
+    await debateEngine
+      .submitUserResponse(
+        debateId,
+        input.content
+      );
+
+  response.status(201).json({
+    success: true,
+    data: {
+      message
+    }
+  });
+}
+
+export async function challenge(
+  request: Request,
+  response: Response
+): Promise<void> {
+  const debateId =
+    request.params.id;
+
+  if (
+    typeof debateId !== "string"
+  ) {
+    response.status(400).json({
+      success: false,
+      message: "Invalid debate ID"
+    });
+    return;
+  }
+
+  const existing =
+    await getDebateById(
+      debateId
+    );
+
+  if (!existing) {
+    response.status(404).json({
+      success: false,
+      message: "Debate not found"
+    });
+    return;
+  }
+
+  if (
+    existing.userId.toString() !==
+    request.userId
+  ) {
+    response.status(403).json({
+      success: false,
+      message: "Access denied"
+    });
+    return;
+  }
+
+  const message =
+    await debateEngine
+      .generateChallengerResponse(
+        debateId
+      );
+
+  const debate =
+    await getDebateById(
+      debateId
+    );
+
+  response.status(200).json({
+    success: true,
+    data: {
+      debate,
+      message
+    }
+  });
+}
+
+export async function judge(
+  request: Request,
+  response: Response
+): Promise<void> {
+  const debateId =
+    request.params.id;
+
+  if (
+    typeof debateId !== "string"
+  ) {
+    response.status(400).json({
+      success: false,
+      message: "Invalid debate ID"
+    });
+    return;
+  }
+
+  const existing =
+    await getDebateById(
+      debateId
+    );
+
+  if (!existing) {
+    response.status(404).json({
+      success: false,
+      message: "Debate not found"
+    });
+    return;
+  }
+
+  if (
+    existing.userId.toString() !==
+    request.userId
+  ) {
+    response.status(403).json({
+      success: false,
+      message: "Access denied"
+    });
+    return;
+  }
+
+  const evaluation =
+    await debateEngine
+      .judgeDebate(
+        debateId
+      );
+
+  const debate =
+    await getDebateById(
+      debateId
+    );
+
+  response.status(200).json({
+    success: true,
+    data: {
+      debate,
+      evaluation
     }
   });
 }

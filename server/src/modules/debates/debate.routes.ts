@@ -4,7 +4,8 @@ import {
   create,
   list,
   getOne,
-  start
+  start,
+  respond
 } from "./debate.controller.js";
 
 import {
@@ -33,6 +34,11 @@ router.get(
 router.post(
   "/:id/start",
   start
+);
+
+router.post(
+  "/:id/respond",
+  respond
 );
 
 export default router;

@@ -30,6 +30,9 @@ export const submitResponseSchema =
       )
       .max(
         5000,
-        "Response is too long"
+        "Response cannot exceed 5000 characters"
       )
   });
+
+
+
