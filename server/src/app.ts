@@ -1,10 +1,11 @@
 import cors from "cors";
 import express from "express";
 import helmet from "helmet";
-
+import cookieParser from "cookie-parser";
 import { env } from "./config/env.js";
 import healthRoutes from "./routes/health.routes.js";
 import { errorMiddleware } from "./middleware/error.middleware.js";
+import authRoutes from "./modules/auth/auth.routes.js";
 
 const app = express();
 
@@ -35,11 +36,13 @@ app.use(
   })
 );
 
+app.use(cookieParser());
+
 /*
  * Routes
  */
 app.use("/api/health", healthRoutes);
-
+app.use("/api/auth", authRoutes);
 /*
  * 404 handler
  */

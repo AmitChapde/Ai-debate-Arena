@@ -18,7 +18,15 @@ const envSchema = z.object({
 
   CLIENT_URL: z
     .string()
-    .url("CLIENT_URL must be a valid URL")
+    .url("CLIENT_URL must be a valid URL"),
+
+  JWT_SECRET: z
+    .string()
+    .min(32, "JWT_SECRET must be at least 32 characters"),
+
+  JWT_EXPIRES_IN: z
+    .string()
+    .default("7d")
 });
 
 const parsedEnv = envSchema.safeParse(process.env);
@@ -26,9 +34,7 @@ const parsedEnv = envSchema.safeParse(process.env);
 if (!parsedEnv.success) {
   console.error("❌ Invalid environment configuration:");
 
-  console.error(
-    z.prettifyError(parsedEnv.error)
-  );
+  console.error(z.prettifyError(parsedEnv.error));
 
   process.exit(1);
 }
