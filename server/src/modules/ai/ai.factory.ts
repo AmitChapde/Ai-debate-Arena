@@ -1,4 +1,5 @@
 import { GeminiProvider } from "./providers/gemini.provider.js";
+import { GroqProvider } from "./providers/groq.provider.js";
 import { OllamaProvider } from "./providers/ollama.provider.js";
 
 import type {
@@ -18,6 +19,9 @@ export function createAIProvider(
 
     case "ollama":
       return new OllamaProvider();
+
+    case "groq":
+      return new GroqProvider();
 
     default:
       throw new Error(

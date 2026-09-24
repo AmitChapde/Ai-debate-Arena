@@ -1,6 +1,7 @@
 export type AIProviderName =
   | "gemini"
-  | "ollama";
+  | "ollama"
+  | "groq";
 
 export interface GenerateRequest {
   systemPrompt: string;

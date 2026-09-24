@@ -21,6 +21,8 @@ const envSchema = z.object({
   OLLAMA_MODEL: z.string().min(1).default("llama3.2"),
 
   GEMINI_API_KEY: z.string().optional(),
+
+  GROQ_API_KEY: z.string().optional(),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);

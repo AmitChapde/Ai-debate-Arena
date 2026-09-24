@@ -74,7 +74,7 @@ const agentSchema =
 
       provider: {
         type: String,
-        enum: ["gemini", "ollama"],
+        enum: ["gemini", "ollama", "groq"],
         required: true
       },
 

@@ -46,7 +46,7 @@ export const createAgentSchema =
       )
       .min(1),
 
-    provider: z.enum(["gemini", "ollama"]),
+    provider: z.enum(["gemini", "ollama", "groq"]),
 
     model: z
       .string()
