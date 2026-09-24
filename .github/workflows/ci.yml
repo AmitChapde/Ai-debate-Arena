@@ -6,6 +6,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: npm }
-      - run: npm ci
-      - run: npm run build
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            client/package-lock.json
+            server/package-lock.json
+      - name: Install client dependencies
+        run: npm ci
+        working-directory: client
+      - name: Typecheck client
+        run: npm run typecheck
+        working-directory: client
+      - name: Test client
+        run: npm test
+        working-directory: client
+      - name: Install server dependencies
+        run: npm ci
+        working-directory: server
+      - name: Typecheck server
+        run: npm run typecheck
+        working-directory: server
+      - name: Test server
+        run: npm test
+        working-directory: server
