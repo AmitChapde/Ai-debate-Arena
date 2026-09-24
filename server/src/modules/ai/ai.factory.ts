@@ -1,4 +1,5 @@
 import { GeminiProvider } from "./providers/gemini.provider.js";
+import { OllamaProvider } from "./providers/ollama.provider.js";
 
 import type {
   AIProvider
@@ -26,9 +27,7 @@ export function createAIProvider(
       );
 
     case "ollama":
-      throw new Error(
-        "Ollama provider is not implemented yet"
-      );
+      return new OllamaProvider();
 
     default:
       throw new Error(

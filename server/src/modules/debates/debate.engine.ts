@@ -17,6 +17,7 @@ import type {
   DebateMessage,
   DebateTurn,
 } from "./debate.types.js";
+import { createEvaluation } from "../evaluations/evaluation.service.js";
 
 export class DebateEngine {
   constructor(private readonly aiProvider: AIProvider) {}
@@ -196,7 +197,7 @@ export class DebateEngine {
           adaptabilityScore: { type: "integer", minimum: 0, maximum: 100 },
           strengths: { type: "array", items: { type: "string" } },
           weaknesses: { type: "array", items: { type: "string" } },
-          feedback: { type: "string" }
+          feedback: { type: "string" },
         },
         required: [
           "overallScore",
@@ -207,10 +208,10 @@ export class DebateEngine {
           "adaptabilityScore",
           "strengths",
           "weaknesses",
-          "feedback"
+          "feedback",
         ],
-        additionalProperties: false
-      }
+        additionalProperties: false,
+      },
     });
 
     const evaluation = this.parseEvaluation(response.text);
@@ -221,6 +222,32 @@ export class DebateEngine {
     };
 
     await completeDebate(debateId, completeEvaluation);
+
+    await createEvaluation({
+      debateId,
+
+      userId: debate.userId.toString(),
+
+      scenarioId: debate.scenarioId.toString(),
+
+      overallScore: completeEvaluation.overallScore,
+
+      reasoningScore: completeEvaluation.reasoningScore,
+
+      evidenceScore: completeEvaluation.evidenceScore,
+
+      counterArgumentScore: completeEvaluation.counterArgumentScore,
+
+      consistencyScore: completeEvaluation.consistencyScore,
+
+      adaptabilityScore: completeEvaluation.adaptabilityScore,
+
+      strengths: completeEvaluation.strengths,
+
+      weaknesses: completeEvaluation.weaknesses,
+
+      feedback: completeEvaluation.feedback,
+    });
 
     return completeEvaluation;
   }
@@ -368,9 +395,7 @@ Return the requested JSON structure.
     let cleaned = rawText.trim();
 
     // Preserve a fallback for providers that disregard structured output.
-    const fencedJson = cleaned.match(
-      /```(?:json)?\s*([\s\S]*?)\s*```/i,
-    );
+    const fencedJson = cleaned.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
 
     if (fencedJson?.[1]) {
       cleaned = fencedJson[1].trim();
@@ -414,11 +439,17 @@ Return the requested JSON structure.
       }
     }
 
-    if (!Array.isArray(data.strengths) || !data.strengths.every((item) => typeof item === "string")) {
+    if (
+      !Array.isArray(data.strengths) ||
+      !data.strengths.every((item) => typeof item === "string")
+    ) {
       throw new Error("Invalid judge strengths");
     }
 
-    if (!Array.isArray(data.weaknesses) || !data.weaknesses.every((item) => typeof item === "string")) {
+    if (
+      !Array.isArray(data.weaknesses) ||
+      !data.weaknesses.every((item) => typeof item === "string")
+    ) {
       throw new Error("Invalid judge weaknesses");
     }
 

@@ -16,7 +16,13 @@ const envSchema = z.object({
 
   JWT_EXPIRES_IN: z.string().default("7d"),
 
-  GEMINI_API_KEY: z.string().min(1, "GEMINI_API_KEY is required"),
+  AI_PROVIDER: z.enum(["ollama", "gemini"]).default("ollama"),
+
+  OLLAMA_BASE_URL: z.string().url().default("http://localhost:11434"),
+
+  OLLAMA_MODEL: z.string().min(1).default("llama3.2"),
+
+  GEMINI_API_KEY: z.string().optional(),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);

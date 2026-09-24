@@ -28,8 +28,8 @@ const agents = [
       "Prefer reasoning over rhetorical tricks"
     ],
 
-    provider: "gemini" as const,
-    model: "gemini-3.6-flash",
+    provider: "ollama" as const,
+    model: process.env.OLLAMA_MODEL ?? "llama3.2",
     temperature: 0.7,
     status: "active" as const
   },
@@ -59,8 +59,8 @@ const agents = [
       "Accept a strong argument when the evidence supports it"
     ],
 
-    provider: "gemini" as const,
-    model: "gemini-3.6-flash",
+    provider: "ollama" as const,
+    model: process.env.OLLAMA_MODEL ?? "llama3.2",
     temperature: 0.8,
     status: "active" as const
   },
@@ -92,8 +92,8 @@ const agents = [
       "Do not invent evidence"
     ],
 
-    provider: "gemini" as const,
-    model: "gemini-3.6-flash",
+    provider: "ollama" as const,
+    model: process.env.OLLAMA_MODEL ?? "llama3.2",
     temperature: 0.3,
     status: "active" as const
   }

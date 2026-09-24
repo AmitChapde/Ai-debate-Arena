@@ -10,6 +10,7 @@ import scenarioRoutes from "./modules/scenarios/scenario.routes.js";
 import agentRoutes from "./modules/agents/agent.routes.js";
 import aiTestRoutes from "./routes/ai-test.routes.js";
 import debateRoutes from "./modules/debates/debate.routes.js";
+import evaluationRoutes from "./modules/evaluations/evaluation.routes.js";
 
 const app = express();
 
@@ -51,6 +52,7 @@ app.use("/api/scenarios", scenarioRoutes);
 app.use("/api/agents", agentRoutes);
 app.use("/api/ai-test", aiTestRoutes);
 app.use("/api/debates", debateRoutes);
+app.use("/api/evaluations", evaluationRoutes);
 /*
  * 404 handler
  */
