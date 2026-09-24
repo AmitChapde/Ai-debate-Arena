@@ -7,11 +7,9 @@ export type AgentStatus =
   | "active"
   | "inactive";
 
-export type AIProvider =
-  | "gemini"
-  | "openai"
-  | "groq"
-  | "ollama";
+import type { AIProviderName } from "../ai/ai.types.js";
+
+export type AIProvider = AIProviderName;
 
 export interface IAgent {
   name: string;

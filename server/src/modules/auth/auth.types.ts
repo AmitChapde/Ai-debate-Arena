@@ -10,7 +10,7 @@ export interface LoginInput {
 }
 
 export interface AuthUser {
-  id: string;
+  _id: string;
   name: string;
   email: string;
   role: "user" | "admin";

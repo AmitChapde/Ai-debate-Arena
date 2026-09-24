@@ -1,16 +1,16 @@
 import {
-  GoogleGenAI
+  GoogleGenAI,
 } from "@google/genai";
 
 import { env } from "../../../config/env.js";
 
 import type {
-  AIProvider
+  AIProvider,
 } from "../ai.provider.js";
 
 import type {
   GenerateRequest,
-  GenerateResponse
+  GenerateResponse,
 } from "../ai.types.js";
 
 export class GeminiProvider
@@ -21,18 +21,27 @@ export class GeminiProvider
   constructor() {
     this.client =
       new GoogleGenAI({
-        apiKey: env.GEMINI_API_KEY
+        apiKey: env.GEMINI_API_KEY,
       });
   }
 
   async generate(
-    request: GenerateRequest
+    request: GenerateRequest,
   ): Promise<GenerateResponse> {
+    const model = request.model?.trim();
+
+    if (!model) {
+      throw new Error(
+        "Gemini model must be supplied in the generation request",
+      );
+    }
+
     const response =
       await this.client.models.generateContent({
-        model: "gemini-3.6-flash",
+        model,
 
-        contents: request.userPrompt,
+        contents:
+          request.userPrompt,
 
         config: {
           systemInstruction:
@@ -48,14 +57,15 @@ export class GeminiProvider
             request.responseMimeType,
 
           responseJsonSchema:
-            request.responseJsonSchema
-        }
+            request.responseJsonSchema,
+        },
       });
 
     return {
-      text: response.text ?? "",
+      text:
+        response.text ?? "",
 
-      model: "gemini-3.6-flash",
+      model,
 
       provider: "gemini",
 
@@ -70,8 +80,8 @@ export class GeminiProvider
 
         totalTokens:
           response.usageMetadata
-            ?.totalTokenCount
-      }
+            ?.totalTokenCount,
+      },
     };
   }
-}   
+}

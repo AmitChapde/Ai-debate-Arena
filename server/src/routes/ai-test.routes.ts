@@ -69,6 +69,7 @@ router.post(
         await provider.generate({
           systemPrompt,
           userPrompt,
+          model: agent.model,
           temperature:
             agent.temperature,
           maxTokens: 800

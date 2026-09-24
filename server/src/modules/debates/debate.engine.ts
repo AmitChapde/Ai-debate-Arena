@@ -1,4 +1,4 @@
-import type { AIProvider } from "../ai/ai.provider.js";
+import { createAIProvider } from "../ai/ai.factory.js";
 
 import {
   getDebateById,
@@ -22,8 +22,12 @@ import type {
 
 import { createEvaluation } from "../evaluations/evaluation.service.js";
 
+export const DEFAULT_DEBATE_ROUNDS = 3;
+
 export class DebateEngine {
-  constructor(private readonly aiProvider: AIProvider) {}
+  constructor(
+    private readonly createProvider: typeof createAIProvider,
+  ) {}
 
   async generateAdvocateResponse(
     debateId: string,
@@ -60,7 +64,7 @@ export class DebateEngine {
     }
 
     const response =
-      await this.aiProvider.generate({
+      await this.createProvider(agent.provider).generate({
         systemPrompt:
           buildAgentSystemPrompt(agent),
 
@@ -70,6 +74,9 @@ export class DebateEngine {
             debate.selectedPosition,
             debate.messages,
           ),
+
+        model:
+          agent.model,
 
         temperature:
           agent.temperature,
@@ -179,7 +186,7 @@ export class DebateEngine {
     }
 
     const response =
-      await this.aiProvider.generate({
+      await this.createProvider(agent.provider).generate({
         systemPrompt:
           buildAgentSystemPrompt(agent),
 
@@ -189,6 +196,9 @@ export class DebateEngine {
             debate.selectedPosition,
             debate.messages,
           ),
+
+        model:
+          agent.model,
 
         temperature:
           agent.temperature,
@@ -211,13 +221,8 @@ export class DebateEngine {
       message,
     );
 
-    /*
-     * For the MVP we run two
-     * complete rounds before judging.
-     */
-    if (
-      debate.currentRound >= 2
-    ) {
+    // Judge after the final configured round; otherwise advance to the next.
+    if (debate.currentRound >= DEFAULT_DEBATE_ROUNDS) {
       await updateDebateTurn(
         debateId,
         "judge",
@@ -253,6 +258,12 @@ export class DebateEngine {
       "judge",
     );
 
+    if (debate.currentRound < DEFAULT_DEBATE_ROUNDS) {
+      throw new Error(
+        `Debate cannot be judged before round ${DEFAULT_DEBATE_ROUNDS} is complete`,
+      );
+    }
+
     const scenario =
       await Scenario.findById(
         debate.scenarioId,
@@ -274,7 +285,7 @@ export class DebateEngine {
     }
 
     const response =
-      await this.aiProvider.generate({
+      await this.createProvider(agent.provider).generate({
         systemPrompt:
           `${buildAgentSystemPrompt(agent)}
 
@@ -320,6 +331,9 @@ Required structure:
             debate.selectedPosition,
             debate.messages,
           ),
+
+        model:
+          agent.model,
 
         temperature:
           agent.temperature,

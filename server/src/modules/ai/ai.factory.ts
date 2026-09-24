@@ -16,16 +16,6 @@ export function createAIProvider(
     case "gemini":
       return new GeminiProvider();
 
-    case "openai":
-      throw new Error(
-        "OpenAI provider is not implemented yet"
-      );
-
-    case "groq":
-      throw new Error(
-        "Groq provider is not implemented yet"
-      );
-
     case "ollama":
       return new OllamaProvider();
 

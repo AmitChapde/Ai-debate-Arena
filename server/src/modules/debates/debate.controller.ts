@@ -18,13 +18,9 @@ import {
 import { DebateEngine } from "./debate.engine.js";
 
 import { createAIProvider } from "../ai/ai.factory.js";
-import { env } from "../../config/env.js";
-
-const aiProvider =
-  createAIProvider(env.AI_PROVIDER);
 
 const debateEngine =
-  new DebateEngine(aiProvider);
+  new DebateEngine(createAIProvider);
 
 export async function create(
   request: Request,
