@@ -3,6 +3,7 @@ import { Router } from "express";
 import {
   register,
   login,
+  logout,
   me,
 } from "./auth.controller.js";
 
@@ -19,6 +20,12 @@ router.post(
 router.post(
   "/login",
   login
+);
+
+router.post(
+  "/logout",
+  requireAuth,
+  logout
 );
 
 // Protected routes
