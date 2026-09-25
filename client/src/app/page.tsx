@@ -37,6 +37,33 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <footer className="border-t border-zinc-800 bg-zinc-950/90">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-6 py-5 text-sm text-zinc-400 sm:flex-row">
+          <p>
+            © 2026 <span className="font-medium text-zinc-200">Amit Chapde</span>
+          </p>
+
+          <div className="flex items-center gap-4">
+            <a
+              href="https://github.com/AmitChapde"
+              target="_blank"
+              rel="noreferrer"
+              className="transition hover:text-white"
+            >
+              GitHub
+            </a>
+            <a
+              href="https://www.linkedin.com/in/amit-chapde"
+              target="_blank"
+              rel="noreferrer"
+              className="transition hover:text-white"
+            >
+              LinkedIn
+            </a>
+          </div>
+        </div>
+      </footer>
     </main>
   );
 }
